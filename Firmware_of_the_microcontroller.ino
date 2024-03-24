@@ -11,7 +11,7 @@ File myFile;
 #define RST_PIN 9
 #define RED_LED_PIN 7
 #define GREEN_LED_PIN 8
-#define YELLOW_LED_PIN 6
+#define YELLOW_LED_PIN 3
 #define RELE_PIN 4
  
 MFRC522 rfid(SS_PIN, RST_PIN); // Instance of the class
@@ -146,7 +146,6 @@ void loop() {
     return;
   }
 
-
   if (rfid.uid.uidByte[0] != nuidPICC[0] || 
     rfid.uid.uidByte[1] != nuidPICC[1] || 
     rfid.uid.uidByte[2] != nuidPICC[2] || 
@@ -169,6 +168,13 @@ void loop() {
 
     uint32_t pos = 0;
     bool access = false;
+
+    digitalWrite(RST_PIN, HIGH);          // Сбрасываем модуль
+    digitalWrite(5, HIGH); 
+    delayMicroseconds(2);                 // Ждем 2 мкс
+    digitalWrite(RST_PIN, LOW);           // Отпускаем сброс
+    digitalWrite(5, LOW);
+    rfid.PCD_Init(); 
     
     digitalWrite(RELE_PIN, HIGH);
     
@@ -235,7 +241,6 @@ void loop() {
           buff = myFile.read(); 
           i++;
         }
-        Serial.println(i);
         //buff = myFile.read(); 
         if(buff != '&'){
           buff = myFile.read(); 
@@ -260,18 +265,14 @@ void loop() {
             blink(GREEN_LED_PIN);
             access = true;
           }else{
-            if(buff == '-'){
-              blink(YELLOW_LED_PIN);
-            }else{
-              blink(RED_LED_PIN);
-            }
+            blink(RED_LED_PIN);
           }
           break;
         }
         if(myFile.available()){
           buff = myFile.read();
         }else{
-          blink(YELLOW_LED_PIN);
+          blink(RED_LED_PIN);
         }
       }
     }else{
@@ -296,15 +297,8 @@ void loop() {
       Serial.println("All done");
     }
 
-
     digitalWrite(RELE_PIN, LOW);
     
-    digitalWrite(RST_PIN, HIGH);          // Сбрасываем модуль
-    digitalWrite(5, HIGH); 
-    delayMicroseconds(2);                 // Ждем 2 мкс
-    digitalWrite(RST_PIN, LOW);           // Отпускаем сброс
-    digitalWrite(5, LOW);
-    rfid.PCD_Init(); 
     
     
   }
